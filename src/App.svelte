@@ -2,6 +2,7 @@
     import * as d3 from "d3";
     import * as THREE from "THREE";
     import * as TWEEN from "@tweenjs/tween.js";
+    // import * as countryDetails from "../json/countries.json";
     import { onMount } from "svelte";
     import { fetchCountryData } from "./api/api";
     import { country, countryInfo, isCountryClicked, isCountryHovered } from "./stores/country.js";
@@ -231,7 +232,7 @@
     <div class="container" class:active="{$isCountryClicked}" id="three-container"></div>
 </main>
 
-<style>
+<style type="text/scss">
     :global(body) {
         cursor: grab;
         font-family: 'Play', sans-serif;
@@ -265,28 +266,28 @@
         height: 2px;
         width: 20px;
         transition: margin-right 250ms ease;
-    }
 
-    .back-button__arrow::after {
-        background-color: #ffffff;
-        content: "";
-        height: 2px;
-        width: 10px;
-        left: -2px;
-        top: 3px;
-        position: absolute;
-        transform: rotate(45deg);
-    }
+        &::before {
+            background-color: #ffffff;
+            content: "";
+            height: 2px;
+            width: 10px;
+            top: -3px;
+            left: -2px;
+            position: absolute;
+            transform: rotate(-45deg);
+        }
 
-    .back-button__arrow::before {
-        background-color: #ffffff;
-        content: "";
-        height: 2px;
-        width: 10px;
-        top: -3px;
-        left: -2px;
-        position: absolute;
-        transform: rotate(-45deg);
+        &::after {
+            background-color: #ffffff;
+            content: "";
+            height: 2px;
+            width: 10px;
+            left: -2px;
+            top: 3px;
+            position: absolute;
+            transform: rotate(45deg);
+        }
     }
 
     .back-button__wrapper {
@@ -297,14 +298,16 @@
         right: 20px;
         top: 20px;
         z-index: 2;
-    }
 
-    .back-button__wrapper:hover > .back-button__arrow {
-        margin-right: 15px;
-    }
+        &:hover {
+            .back-button__arrow {
+                margin-right: 15px;
+            }
 
-    .back-button__wrapper:hover > .back-button {
-        letter-spacing: 3px;
+            .back-button {
+                letter-spacing: 3px;
+            }
+        }
     }
 
     .container {
@@ -328,10 +331,10 @@
         text-transform: uppercase;
         transition: top 300ms ease;
         width: 100%;
-    }
 
-    .country-name.active {
-        top: 10px;
+        &.active {
+            top: 10px;
+        }
     }
 
     .country-data {
@@ -342,31 +345,31 @@
         position: absolute;
         bottom: 0;
         width: 100%;
-    }
 
-    .country-data.active {
-        bottom: initial;
-        display: flex;
-        align-items: flex-start;
-        flex-direction: column;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: auto;
-    }
+        &.active {
+            bottom: initial;
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: auto;
 
-    .country-data.active .country-data--wrapper {
-        align-items: center;
-        display: flex;
-        font-size: 24px;
-    }
+            .country-data--wrapper {
+                align-items: center;
+                display: flex;
+                font-size: 24px;
+            }
 
-    .country-data.active .country-data--category {
-        color: #ffffff;
-        font-size: 18px;
-        margin-right: 15px;
+            .country-data--category {
+                color: #ffffff;
+                font-size: 18px;
+                margin-right: 15px;
+            }
+        }
     }
-
+    
     .country-data--wrapper {
         color: #ffffff;
         padding: 12px 20px;
