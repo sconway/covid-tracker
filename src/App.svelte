@@ -4,8 +4,12 @@
     import * as TWEEN from "@tweenjs/tween.js";
     // import * as countryDetails from "../json/countries.json";
     import { onMount } from "svelte";
+    import DataSourceInfo from "./components/DataSourceInfo.svelte"
+    import FullCountryStatistics from "./components/FullCountryStatistics.svelte"
+    import ShortCountryStatistics from "./components/ShortCountryStatistics.svelte"
     import { fetchCountryData } from "./api/api";
     import { country, countryInfo, isCountryClicked, isCountryHovered } from "./stores/country.js";
+    import { isDataPanelActive } from "./stores/dataPanel.js"
     import { onCountryHoverOff } from "./globeEventHandlers/globeMouseMove";
     import { initScene } from "./utils/sceneUtils/scene";
     import { loadMap } from "./utils/mapUtils/loadMap";
@@ -19,7 +23,6 @@
     let root;
     let renderer;
     let scene;
-    let numberFormat = Intl.NumberFormat();
 
     /**
      * Initializes the scene, renderer, and camera.
@@ -35,7 +38,6 @@
 
         scene = new THREE.Scene();
         renderer = new THREE.WebGLRenderer({
-            alpha: true,
             antialias: true,
             canvas: canvas.node(),
         });
@@ -72,12 +74,6 @@
         return "";
     }
 
-    const getCountryInformation = (countryInfo, property) => {
-        if (countryInfo) return countryInfo[property];
-
-        return null;
-    }
-
     const setEarthAndClouds = () => {
         cloud = scene.getObjectByName("cloud");
         root = scene.getObjectByName("root");
@@ -88,7 +84,7 @@
      * Updates any values that are used for animation or control.
      */
     const update = () => {
-      if (!$isCountryHovered) {
+      if (!$isCountryHovered && !$isDataPanelActive) {
         if (cloud) cloud.rotation.y += 0.000625;
         if (root && !$isCountryClicked) root.rotation.y += 0.0005;
         // update any transitions on existing tweens
@@ -107,10 +103,9 @@
         onCountryHoverOff(scene);
     }
 
-    let countryName = getCountryCovidStats($country, "country");
-    let confirmedCases = getCountryCovidStats($country, "confirmed");
-    let criticalCases = getCountryCovidStats($country, "critical");
-    let deaths = getCountryCovidStats($country, "deaths");
+    const handleInfoClick = () => {
+        isDataPanelActive.update(() => true)
+    }
 </script>
 
 <svelte:head>
@@ -118,109 +113,21 @@
 </svelte:head>
 
 <main>
+    <img on:click={handleInfoClick} class="info-icon" alt="data source information" title="Data source information, and how percentages are calculated" src="images/info.png" />
+
     <h2 class="country-name" class:active="{$isCountryClicked}">{getCountryCovidStats($country, "country")}</h2>
     
-    <aside class="country-data" class:active="{$isCountryClicked}">
-        {#if $isCountryClicked && getCountryInformation($countryInfo, "capital")}
-            <div class="country-data--wrapper">
-                <p class="country-data--category">
-                    Capital city: 
-                </p>
-                <p class="country-data--metric">
-                    {getCountryInformation($countryInfo, "capital")}
-                </p>
-            </div>
-        {/if}
+    {#if $isDataPanelActive}
+        <DataSourceInfo />
+    {/if}
 
-        {#if $isCountryClicked && getCountryInformation($countryInfo, "population")}
-            <div class="country-data--wrapper">
-                <p class="country-data--category">
-                    Population: 
-                </p>
-                <p class="country-data--metric">
-                    {getCountryInformation($countryInfo, "population")}
-                </p>
-            </div>
-        {/if}
+    {#if $isCountryClicked}
+        <FullCountryStatistics countries={countries} />
+    {/if}
 
-        {#if $isCountryClicked && getCountryInformation($countryInfo, "population") && getCountryCovidStats($country, "confirmed")}
-            <div class="country-data--wrapper">
-                <p class="country-data--category">
-                    Percentage of population infected: 
-                </p>
-                <p class="country-data--metric">
-                    {
-                        Number(
-                            (getCountryCovidStats($country, "confirmed") / 
-                            getCountryInformation($countryInfo, "population")) * 100
-                        ).toFixed(2)
-                    }%
-                </p>
-            </div>
-        {/if}
-
-        {#if $isCountryClicked && getCountryCovidStats($country, "deaths") && getCountryCovidStats($country, "confirmed")}
-            <div class="country-data--wrapper">
-                <p class="country-data--category">
-                    Death rate: 
-                </p>
-                <p class="country-data--metric">
-                    {
-                        Number((
-                            getCountryCovidStats($country, "deaths") / 
-                            (getCountryCovidStats($country, "confirmed") + getCountryCovidStats($country, "recovered"))
-                        ) * 100).toFixed(2)
-                    }%   
-                </p>
-            </div>
-        {/if}
-
-        {#if getCountryCovidStats($country, "confirmed")}
-          <div class="country-data--wrapper">
-              <p class="country-data--category country-data--category__yellow">
-                  Confirmed cases{#if $isCountryClicked}:{/if}
-              </p>
-              <p class="country-data--metric">
-                  {numberFormat.format(getCountryCovidStats($country, "confirmed"))}
-              </p>
-          </div>
-        {/if}
-
-        {#if getCountryCovidStats($country, "critical")}
-          <div class="country-data--wrapper">
-              <p class="country-data--category country-data--category__orange">
-                  Critical cases{#if $isCountryClicked}:{/if}
-              </p>
-              <p class="country-data--metric">
-                  {numberFormat.format(getCountryCovidStats($country, "critical"))} 
-              </p>
-          </div>
-        {/if}
-
-        {#if getCountryCovidStats($country, "deaths")}
-          <div class="country-data--wrapper">
-              <p class="country-data--category country-data--category__red">
-                  Deaths{#if $isCountryClicked}:{/if}
-              </p>
-              
-              <p class="country-data--metric">
-                  {numberFormat.format(getCountryCovidStats($country, "deaths"))} 
-              </p>
-          </div>
-        {/if}
-
-        {#if getCountryCovidStats($country, "recovered")}
-          <div class="country-data--wrapper">
-              <p class="country-data--category country-data--category__green">
-                  Recovered{#if $isCountryClicked}:{/if}
-              </p>
-              <p class="country-data--metric">
-                  {numberFormat.format(getCountryCovidStats($country, "recovered"))} 
-              </p>
-          </div>
-        {/if}
-
-    </aside>
+    {#if $isCountryHovered}
+        <ShortCountryStatistics countries={countries} />
+    {/if}
 
     {#if $isCountryClicked}
         <div class="back-button__wrapper" on:click={handleBackButtonClick}>
@@ -245,7 +152,7 @@
     }
 
     main {
-        background-color: #232323;
+        background-color: #111025;
     }
 
     p {
@@ -313,6 +220,7 @@
     .container {
         position: relative;
         transition: transform 500ms ease;
+        z-index: 0;
     }
 
     .container.active {
@@ -331,84 +239,20 @@
         text-transform: uppercase;
         transition: top 300ms ease;
         width: 100%;
+        z-index: 2;
 
         &.active {
             top: 10px;
         }
     }
 
-    .country-data {
-        align-items: center;
-        display: flex;
-        font-size: 2rem;
-        justify-content: center;
+    .info-icon {
+        cursor: pointer;
+        height: 30px;
+        width: 30px;
         position: absolute;
-        bottom: 0;
-        width: 100%;
-
-        &.active {
-            bottom: initial;
-            display: flex;
-            align-items: flex-start;
-            flex-direction: column;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: auto;
-
-            .country-data--wrapper {
-                align-items: center;
-                display: flex;
-                font-size: 24px;
-            }
-
-            .country-data--category {
-                color: #ffffff;
-                font-size: 18px;
-                margin-right: 15px;
-            }
-        }
-    }
-    
-    .country-data--wrapper {
-        color: #ffffff;
-        padding: 12px 20px;
-        text-align: center;
-    }
-
-    .country-data--category__green {
-        color: green;
-    }
-    
-    .country-data--category__yellow {
-        color: yellow;
-    }
-    
-    .country-data--category__orange {
-        color: orange;
-    }
-    
-    .country-data--category__red {
-        color: red;
-    }
-
-    @media (min-width: 1068px) {
-        .country-data.active .country-data--wrapper {
-            font-size: 28px;
-        }
-
-        .country-data.active .country-data--category {
-        font-size: 22px;
-    }
-    }
-
-    @media (min-width: 1400px) {
-        .country-data.active .country-data--wrapper {
-            font-size: 32px;
-        }
-
-        .country-data.active .country-data--category {
-        font-size: 26px;
-    }
+        left: 20px;
+        top: 20px;
+        z-index: 4;
     }
 </style>
