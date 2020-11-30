@@ -26,26 +26,28 @@
     {#if getCountryCovidStats($country, "confirmed") && getCountryCovidStats($country, "recovered") &&
     getCountryCovidStats($country, "deaths")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__yellow">Active cases{#if $isCountryClicked}:{/if}</p>
+        <p class="country-data--category country-data--category__yellow">Active cases</p>
         <p class="country-data--metric">
-            { numberFormat.format( getCountryCovidStats($country, "confirmed") - (getCountryCovidStats($country,
-            "recovered") + getCountryCovidStats($country, "deaths")) ) }
+            { getCountryCovidStats($country, "confirmed") - (getCountryCovidStats($country, "recovered") +
+            getCountryCovidStats($country, "deaths")) >= 0 ? numberFormat.format(getCountryCovidStats($country,
+            "confirmed") - (getCountryCovidStats($country, "recovered") + getCountryCovidStats($country, "deaths"))) : 0
+            }
         </p>
     </div>
     {/if} {#if getCountryCovidStats($country, "critical")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__orange">Critical cases{#if $isCountryClicked}:{/if}</p>
+        <p class="country-data--category country-data--category__orange">Critical cases</p>
         <p class="country-data--metric">{numberFormat.format(getCountryCovidStats($country, "critical"))}</p>
     </div>
     {/if} {#if getCountryCovidStats($country, "deaths")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__red">Deaths{#if $isCountryClicked}:{/if}</p>
+        <p class="country-data--category country-data--category__red">Deaths</p>
 
         <p class="country-data--metric">{numberFormat.format(getCountryCovidStats($country, "deaths"))}</p>
     </div>
     {/if} {#if getCountryCovidStats($country, "recovered")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__green">Recovered{#if $isCountryClicked}:{/if}</p>
+        <p class="country-data--category country-data--category__green">Recovered</p>
         <p class="country-data--metric">{numberFormat.format(getCountryCovidStats($country, "recovered"))}</p>
     </div>
     {/if}

@@ -14,8 +14,7 @@ let isMouseDown = false;
 let lastPoint;
 let isClicked;
 
-const unsubscribe = isCountryClicked.subscribe((value) => {
-    console.log("IS CLICKED: ", value);
+export const unsubscribeCountryClick = isCountryClicked.subscribe((value) => {
     isClicked = value;
 });
 
@@ -31,9 +30,6 @@ export const onGlobeMousemove = (event, scene, geo, textureCache, root) => {
     if (country && !isMouseDown && !isClicked) {
         // Only run this if we have the mutex or we moved to a different country.
         if (country.code !== lastCountry || globeMutex) {
-            // console.log("COUNTRY: ", country);
-            // console.log("COUNTRIES: ", countriesJSON);
-            // console.log("COUNTRY DATA: ", countriesJSON[country.code.replace(/[ '.]/g, "")]);
             globeMutex = false;
             lastCountry = country.code;
 
@@ -58,10 +54,12 @@ export const onGlobeMousemove = (event, scene, geo, textureCache, root) => {
             onCountryHover(scene, countriesJSON[country.code.replace(/[ '.]/g, "")]);
         }
     } else {
+        if (isMouseDown)
+            isMouseDown = false
+
         // Only call this once
         if (!globeMutex && !isClicked) {
             globeMutex = true;
-
             onCountryHoverOff(scene);
         }
     }
@@ -92,8 +90,6 @@ export const onGlobeMouseUp = (event, geo, root, camera, scene) => {
     if (isStatic && !isClicked) {
         // Make sure a country is clicked on
         if (country) {
-            console.log("COUNTRY: ", country);
-            console.log("COUNTRY DATA: ", countriesJSON[country.code.replace(/[ '.]/g, "")]);
             const countryData = countriesJSON[country.code.replace(/[ '.]/g, "")];
             onCountryClick(scene, countryData);
 

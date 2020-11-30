@@ -43,8 +43,10 @@
     <div class="country-data--wrapper">
         <p class="country-data--category">Active cases:</p>
         <p class="country-data--metric">
-            {numberFormat.format(getCountryCovidStats($country, "confirmed") - (getCountryCovidStats($country,
-            "recovered") + getCountryCovidStats($country, "deaths")))}
+            { getCountryCovidStats($country, "confirmed") - (getCountryCovidStats($country, "recovered") +
+            getCountryCovidStats($country, "deaths")) >= 0 ? numberFormat.format(getCountryCovidStats($country,
+            "confirmed") - (getCountryCovidStats($country, "recovered") + getCountryCovidStats($country, "deaths"))) : 0
+            }
         </p>
     </div>
     {/if} {#if getCountryCovidStats($country, "critical")}

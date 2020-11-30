@@ -3,14 +3,14 @@
     import * as THREE from "THREE";
     import * as TWEEN from "@tweenjs/tween.js";
     // import * as countryDetails from "../json/countries.json";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import DataSourceInfo from "./components/DataSourceInfo.svelte"
     import FullCountryStatistics from "./components/FullCountryStatistics.svelte"
     import ShortCountryStatistics from "./components/ShortCountryStatistics.svelte"
     import { fetchCountryData } from "./api/api";
     import { country, countryInfo, isCountryClicked, isCountryHovered } from "./stores/country.js";
     import { isDataPanelActive } from "./stores/dataPanel.js"
-    import { onCountryHoverOff } from "./globeEventHandlers/globeMouseMove";
+    import { onCountryHoverOff, unsubscribeCountryClick } from "./globeEventHandlers/globeMouseMove";
     import { initScene } from "./utils/sceneUtils/scene";
     import { loadMap } from "./utils/mapUtils/loadMap";
     import { setCountryImageBack } from "./utils/utils.js";
@@ -43,6 +43,11 @@
         });
         camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
     };
+
+    /**
+     * Called when the DOM is unmounted. Removes the subscription for handling country clicks.
+     */
+    onDestroy(unsubscribeCountryClick);
 
     /**
      * Called when the DOM is first mounted.
