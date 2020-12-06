@@ -56,6 +56,7 @@
 <style type="text/scss">
     .country-data {
         align-items: center;
+        cursor: initial;
         display: flex;
         font-size: 2rem;
         justify-content: center;

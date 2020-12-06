@@ -86,6 +86,7 @@
 
 <style type="text/scss">
     .country-data {
+        cursor: initial;
         font-size: 2rem;
         justify-content: center;
         max-height: 85%;

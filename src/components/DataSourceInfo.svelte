@@ -52,7 +52,7 @@
 
 <style type="text/scss">
     .wrapper {
-        background-color: #111025;
+        background-color: #0f151d;
         cursor: initial;
         overflow: scroll;
         position: absolute;
@@ -109,7 +109,7 @@
 
         &__question {
             font-size: 2rem;
-            margin: 20px 0;
+            margin: 40px 0 20px;
         }
 
         &__answer {
@@ -118,7 +118,7 @@
         }
 
         &__list-item {
-            color: #d20593;
+            color: #3fcaa3;
             font-size: 1.4rem;
             line-height: 1.4;
         }

@@ -54,6 +54,9 @@
      */
     onMount(async () => {
         countries = await fetchCountryData();
+        const loadingScreen = document.getElementById("loadingScreen");
+        loadingScreen.classList.add("active");
+        
         initThreeJSObjects();
         initScene(scene, renderer, camera);
         loadMap(scene, renderer, camera);
@@ -157,7 +160,7 @@
     }
 
     main {
-        background-color: #111025;
+        background-color: #0f151d;
     }
 
     p {

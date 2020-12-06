@@ -10,7 +10,7 @@ if (!window.WebGLRenderingContext || !Detector.webgl) {
 export const initScene = (scene, renderer, camera) => {
     // Configure and add the scene renderer.
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x111025);
+    renderer.setClearColor(0x0f151d);
     document.getElementById("three-container").appendChild(renderer.domElement);
 
     camera.position.z = 1000;
