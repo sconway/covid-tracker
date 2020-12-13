@@ -8,24 +8,34 @@
 </script>
 
 <div class="wrapper" transition:fade>
-    <h2 class="heading">Data Source Information</h2>
+    <!-- <h2 class="heading">Data Source Information</h2> -->
     <a on:click={handleClose} href="javascript:;" class="close-button" />
 
     <aside class="data-sources">
-        <h3 class="data-sources__question">Where does this information come from?</h3>
+        <h2 class="data-sources__heading">About COVID-19 Tracker</h2>
         <p class="data-sources__answer">
-            Data is sourced from institutions like Johns Hopkins CSSE, CDC, WHO, and a few others. This web application
-            imports the aforementioned data via a public API which can be viewed <a href="https://rapidapi.com/Gramzivi/api/covid-19-data/details">here</a>.
+            This project is intended to help provide visibility into the status of each country with regards to the COVID-19 pandemic.
+            The 3D interactive world map is built with the Three.js Javascript library, with help from the D3.js library performing computations
+            to figure out which country is being interacted with. The whole project is built in the Svelte Javascript framework and is partially
+            an exercise to gain more experience with this framework.
         </p>
+
+        <h3 class="data-sources__question">Sources</h3>
+        <ul class="data-sources__list">
+            <li class="data-sources__list-item">
+                John Hopkins CSSE
+            </li>
+            <li class="data-sources__list-item">
+                CDC
+            </li>
+            <li class="data-sources__list-item">
+                WHO
+            </li>
+        </ul>
 
         <h3 class="data-sources__question">How up to date is the data?</h3>
         <p class="data-sources__answer">
             Each country updates their official report data differently. Some countries update every hour, while other countries update every day. It can be assumed that each countries statistics are up to date for a given day.
-        </p>
-
-        <h3 class="data-sources__question">Why are some countries missing data?</h3>
-        <p class="data-sources__answer">
-            The data displayed is the data that each country reports. Some countries do not report certain metrics, so we are unable to display this data.
         </p>
 
         <h3 class="data-sources__question">How are percentages computed?</h3>
@@ -52,7 +62,7 @@
 
 <style type="text/scss">
     .wrapper {
-        background-color: #0f151d;
+        background-color: #000000;
         cursor: initial;
         overflow: scroll;
         position: absolute;
@@ -103,9 +113,14 @@
 
     .data-sources {
         color: #ffffff;
-        margin: 0 auto;
-        padding: 40px;
-        width: 70%;
+        padding: 20px;
+        width: 60%;
+
+        &__heading {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
 
         &__question {
             font-size: 2rem;
@@ -113,14 +128,34 @@
         }
 
         &__answer {
-            font-size: 1.1rem;
-            line-height: 1.4;
+            font-size: 1.3rem;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        &__list {
+            padding: 0;
         }
 
         &__list-item {
-            color: #3fcaa3;
             font-size: 1.4rem;
             line-height: 1.4;
+            list-style: none;
+            margin-bottom: 10px;
+            padding-left: 30px;
+            position: relative;
+
+            &::before {
+                background-color: gray;
+                border-radius: 50%;
+                content: "";
+                height: 15px;
+                width: 15px;
+                position: absolute;
+                left: 0px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
         }
 
         &__metric {

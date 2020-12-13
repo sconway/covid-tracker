@@ -126,10 +126,10 @@ export const latLongToVector3 = (lat, lon, radius, height) => {
  */
 export const setCountryImage = (scene, countryCode) => {
     const loader = new THREE.TextureLoader();
-    const cloud = scene.getObjectByName("cloud");
+    // const cloud = scene.getObjectByName("cloud");
 
-    cloud.material.map = loader.load("images/flags/" + countryCode + ".png");
-    cloud.rotation.y = -Math.PI / 2;
+    // cloud.material.map = loader.load("images/flags/" + countryCode + ".png");
+    // cloud.rotation.y = -Math.PI / 2;
 };
 
 /**
@@ -138,5 +138,5 @@ export const setCountryImage = (scene, countryCode) => {
 export const setCountryImageBack = (scene) => {
     let loader = new THREE.TextureLoader();
 
-    scene.getObjectByName("cloud").material.map = loader.load("images/clouds.png");
+    // scene.getObjectByName("cloud").material.map = loader.load("images/clouds.png");
 };

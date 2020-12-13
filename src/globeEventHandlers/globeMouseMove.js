@@ -34,7 +34,7 @@ export const onGlobeMousemove = (event, scene, geo, textureCache, root) => {
             lastCountry = country.code;
 
             // Overlay the selected country
-            let map = textureCache(country.code, "rgba(0,0,0,0.9)");
+            let map = textureCache(country.code, "#ffffff");
             let material = new THREE.MeshPhongMaterial({
                 depthWrite: false,
                 map: map,
@@ -95,7 +95,7 @@ export const onGlobeMouseUp = (event, geo, root, camera, scene) => {
 
             // Get new camera position
             let temp = new THREE.Mesh();
-            temp.position.copy(convertToXYZ(latlng, 1000));
+            temp.position.copy(convertToXYZ(latlng, 800));
             temp.lookAt(root.position);
             temp.rotateY(Math.PI);
 
@@ -116,7 +116,11 @@ export const onGlobeMouseUp = (event, geo, root, camera, scene) => {
             // Rotate the camera after as it moves to face the globe.
             const tweenRot = getTween.call(camera, "rotation", temp.rotation);
             const rotationTimer = d3.timer(tweenRot);
-            d3.timeout(() => rotationTimer.stop(), 500);
+            d3.timeout(() => {
+                rotationTimer.stop()
+                console.log('Z: ', camera.position.z)
+                // camera.position.z = 800;
+            }, 500);
 
             // Set the earth's rotation back to 0 so the correct country is in view.
             const tweenRootRot = getTween.call(root, "rotation", new THREE.Euler(0, Math.PI, 0));

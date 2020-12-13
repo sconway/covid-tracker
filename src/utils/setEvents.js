@@ -6,14 +6,14 @@ export const setEvents = (camera, items, type, wait, onIntersection = null, onNo
         intersected = false,
         globeIntersected = false,
         hoveredObject = null,
+        leftOffset = window.innerWidth * 0.15,
         hoveredMaterial = null;
 
     let listener = function (event) {
         let mouse = {
-            x: ((event.clientX - 1) / window.innerWidth) * 2 - 1,
+            x: ((event.clientX - leftOffset - 1) / window.innerWidth) * 2 - 1,
             y: -((event.clientY - 1) / window.innerHeight) * 2 + 1,
         };
-
         let cursor = {
             x: event.clientX,
             y: event.clientY,

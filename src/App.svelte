@@ -4,10 +4,11 @@
     import * as TWEEN from "@tweenjs/tween.js";
     // import * as countryDetails from "../json/countries.json";
     import { onDestroy, onMount } from "svelte";
+    import IntroInfo from "./components/IntroInfo.svelte"
     import DataSourceInfo from "./components/DataSourceInfo.svelte"
     import FullCountryStatistics from "./components/FullCountryStatistics.svelte"
     import ShortCountryStatistics from "./components/ShortCountryStatistics.svelte"
-    import { fetchCountryData } from "./api/api";
+    import { fetchCountryData, fetchTotalsData } from "./api/api";
     import { country, countryInfo, isCountryClicked, isCountryHovered } from "./stores/country.js";
     import { isDataPanelActive } from "./stores/dataPanel.js"
     import { onCountryHoverOff, unsubscribeCountryClick } from "./globeEventHandlers/globeMouseMove";
@@ -23,6 +24,7 @@
     let root;
     let renderer;
     let scene;
+    let totals;
 
     /**
      * Initializes the scene, renderer, and camera.
@@ -54,6 +56,8 @@
      */
     onMount(async () => {
         countries = await fetchCountryData();
+        totals = await fetchTotalsData();
+
         const loadingScreen = document.getElementById("loadingScreen");
         loadingScreen.classList.add("active");
         
@@ -83,7 +87,6 @@
     }
 
     const setEarthAndClouds = () => {
-        cloud = scene.getObjectByName("cloud");
         root = scene.getObjectByName("root");
     };
 
@@ -93,8 +96,6 @@
      */
     const update = () => {
       if (!$isCountryHovered && !$isDataPanelActive) {
-        if (cloud) cloud.rotation.y += 0.000625;
-        if (root && !$isCountryClicked) root.rotation.y += 0.0005;
         // update any transitions on existing tweens
         TWEEN.default.update();
       }
@@ -114,34 +115,35 @@
     const handleInfoClick = () => {
         isDataPanelActive.update(() => true)
     }
+
+    const handleClose = () => {
+        isCountryClicked.update((c) => false);
+        countryInfo.update((c) => {});
+        onCountryHoverOff(scene);
+    }
 </script>
 
 <svelte:head>
-    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <main>
-    <img on:click={handleInfoClick} class="info-icon" alt="data source information" title="Data source information, and how percentages are calculated" src="images/info.png" />
+    <p on:click={handleInfoClick} class="info-link">About</p>
 
-    <h2 class="country-name" class:active="{$isCountryClicked}">{getCountryCovidStats($country, "country")}</h2>
-    
+    {#if !$isCountryHovered && !$isCountryClicked && totals}
+        <IntroInfo totals={totals} />
+    {/if}
+
     {#if $isDataPanelActive}
         <DataSourceInfo />
     {/if}
 
     {#if $isCountryClicked}
-        <FullCountryStatistics countries={countries} />
+        <FullCountryStatistics countries={countries} handleClose={handleClose} />
     {/if}
 
     {#if $isCountryHovered}
         <ShortCountryStatistics countries={countries} />
-    {/if}
-
-    {#if $isCountryClicked}
-        <div class="back-button__wrapper" on:click={handleBackButtonClick}>
-            <span class="back-button__arrow"></span>
-            <span class="back-button">Back</span>
-        </div>
     {/if}
 
     <div class="container" class:active="{$isCountryClicked}" id="three-container"></div>
@@ -150,7 +152,7 @@
 <style type="text/scss">
     :global(body) {
         cursor: grab;
-        font-family: 'Play', sans-serif;
+        font-family: 'Montserrat', sans-serif;
         margin: 0;
         padding: 0;
     }
@@ -160,7 +162,9 @@
     }
 
     main {
-        background-color: #0f151d;
+        background-color: #000000;
+        height: 100%;
+        width: 100%;
     }
 
     p {
@@ -226,41 +230,46 @@
     }
 
     .container {
-        position: relative;
-        transition: transform 500ms ease;
+        position: absolute;
+        right: 0;
+        height: 100%;
+        width: 85%;
+        /* transition: transform 500ms ease; */
+        /* transform: translateX(15%); */
         z-index: 0;
     }
 
-    .container.active {
+    /* .container.active {
         transform: translateX(20%);
-    }
+    } */
 
     .country-name {
         color: #ffffff;
-        font-size: 4rem;
-        letter-spacing: 5px;
+        font-size: 2rem;
+        font-weight: 300;
+        letter-spacing: 1px;
         line-height: 1.2;
         margin: 0;
         position: absolute;
-        top: 20px;
-        text-align: center;
-        text-transform: uppercase;
+        left: 15px;
+        top: 60px;
         transition: top 300ms ease;
-        width: 100%;
         z-index: 2;
-
-        &.active {
-            top: 10px;
-        }
     }
 
-    .info-icon {
+    .info-link {
+        color: rgb(102, 100, 100);
         cursor: pointer;
-        height: 30px;
-        width: 30px;
         position: absolute;
-        left: 20px;
-        top: 20px;
-        z-index: 4;
+        right: 20px;
+        bottom: 40px;
+        text-shadow: 0px 0px 1px transparent;
+        transition: all 300ms ease;
+        z-index: 3;
+
+        &:hover {
+            color: #ffffff;
+            text-shadow: 0px 0px 1px #ffffff;
+        }
     }
 </style>

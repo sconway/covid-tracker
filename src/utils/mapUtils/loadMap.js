@@ -1,7 +1,7 @@
 import * as THREE from "THREE";
 import * as topojson from "topojson-client";
 import * as worldJSON from "../../json/world.json";
-import { createEarth } from "./createEarth";
+import { createAtmosphereShader, createEarth, createEarthShader } from "./createEarth";
 import { geodecoder } from "../geoHelpers";
 import { setEvents } from "../setEvents";
 import { memoize } from "../utils";
@@ -14,13 +14,16 @@ import {
     onGlobeMouseDown,
     onGlobeMouseUp,
 } from "../../globeEventHandlers/globeMouseMove";
+import { addPoint, createPoints } from "./points";
 
 /**
  * Used to load in the data that generates the main map/globe.
  */
 export const loadMap = (scene, renderer, camera) => {
     const countries = topojson.feature(worldJSON, worldJSON.objects.countries);
-    const { cloud, earth } = createEarth(sphere);
+    const atmosphere = createAtmosphereShader(sphere);
+    const earth = createEarth(sphere);
+    const earthShader = createEarthShader(sphere);
     // Setup cache for country textures
     const root = new THREE.Object3D();
     const geo = geodecoder(countries.features);
@@ -29,7 +32,7 @@ export const loadMap = (scene, renderer, camera) => {
         return mapTexture(country, color);
     });
     const worldTexture = mapTexture(countries, "#transparent", "transparent");
-    const worldTextureBack = mapTexture(countries, "#111111", "transparent");
+    const worldTextureBack = mapTexture(countries, "#ffffff", "transparent");
     const mapMaterialBack = new THREE.MeshPhongMaterial({
         depthWrite: false,
         color: 0x111111,
@@ -62,19 +65,25 @@ export const loadMap = (scene, renderer, camera) => {
     root.name = "root";
 
     // set the earth image to be above the colored globe
-    earth.renderOrder = 1;
-    cloud.renderOrder = 2;
-
+    // earthShader.renderOrder = 3;
+    // earth.renderOrder = 2;
+    // atmosphere.renderOrder = 1;
+    
     // make sure the back is added to the root/scene first
-    root.add(cloud);
+    // root.add(earthShader);
+    root.add(atmosphere);
     root.add(earth);
     root.add(baseMapBack);
     root.add(baseMapFront);
     root.scale.set(0.1, 0.1, 0.1);
-    root.rotation.y = Math.PI;
-    scene.add(root);
 
-    scaleUpTween(root, renderer, scene, camera);
+    scene.add(root);
+    
+    // createPoints(scene);
+    // addPoint(42.3602558, 71.0572791, 1000, new THREE.Color(0x0000ff), earth);
+
+    scaleUpTween(root, { x: 1, y: 1, z: 1 }, renderer, scene, camera);
+    scaleUpTween(atmosphere, { x: 1.325, y: 1.325, z: 1.325 }, renderer, scene, camera);
 
     // Registers the event listeners for the events on the globe.
     setEvents(camera, [baseMapFront], "mousedown", null);

@@ -1,6 +1,7 @@
 <script>
     import { fly } from "svelte/transition";
     import { country, countryInfo, isCountryClicked, isCountryHovered } from "../stores/country.js";
+    import { abbreviateNumber } from "../utils/formatUtils.js";
 
     const getCountryCovidStats = (countryData, property) => {
         if (countryData && countries && countries.length > 0) {
@@ -17,82 +18,71 @@
         return null;
     };
 
-    let numberFormat = Intl.NumberFormat();
-
     export let countries;
 </script>
 
 <aside class="country-data">
+    <h2 class="country-data--country">{ getCountryCovidStats($country, "country") }</h2>
+
     {#if getCountryCovidStats($country, "confirmed") && getCountryCovidStats($country, "recovered") &&
     getCountryCovidStats($country, "deaths")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__yellow">Active cases</p>
+        <p class="country-data--category">Active cases</p>
         <p class="country-data--metric">
             { getCountryCovidStats($country, "confirmed") - (getCountryCovidStats($country, "recovered") +
-            getCountryCovidStats($country, "deaths")) >= 0 ? numberFormat.format(getCountryCovidStats($country,
-            "confirmed") - (getCountryCovidStats($country, "recovered") + getCountryCovidStats($country, "deaths"))) : 0
-            }
+            getCountryCovidStats($country, "deaths")) >= 0 ? abbreviateNumber(getCountryCovidStats($country,
+            "confirmed") - (getCountryCovidStats($country, "recovered") + getCountryCovidStats($country, "deaths")), 0)
+            : 0 }
         </p>
     </div>
     {/if} {#if getCountryCovidStats($country, "critical")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__orange">Critical cases</p>
-        <p class="country-data--metric">{numberFormat.format(getCountryCovidStats($country, "critical"))}</p>
+        <p class="country-data--category">Critical cases</p>
+        <p class="country-data--metric">{abbreviateNumber(getCountryCovidStats($country, "critical"), 0)}</p>
     </div>
     {/if} {#if getCountryCovidStats($country, "deaths")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__red">Deaths</p>
+        <p class="country-data--category">Deaths</p>
 
-        <p class="country-data--metric">{numberFormat.format(getCountryCovidStats($country, "deaths"))}</p>
+        <p class="country-data--metric">{abbreviateNumber(getCountryCovidStats($country, "deaths"), 0)}</p>
     </div>
     {/if} {#if getCountryCovidStats($country, "recovered")}
     <div class="country-data--wrapper">
-        <p class="country-data--category country-data--category__green">Recovered</p>
-        <p class="country-data--metric">{numberFormat.format(getCountryCovidStats($country, "recovered"))}</p>
+        <p class="country-data--category">Recovered</p>
+        <p class="country-data--metric">{abbreviateNumber(getCountryCovidStats($country, "recovered"), 0)}</p>
     </div>
     {/if}
 </aside>
 
 <style type="text/scss">
     .country-data {
-        align-items: center;
         cursor: initial;
-        display: flex;
-        font-size: 2rem;
-        justify-content: center;
         position: absolute;
-        bottom: 0;
-        width: 100%;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
         z-index: 2;
 
-        &--wrapper {
-            color: #ffffff;
-            padding: 12px 20px;
-            text-align: center;
-        }
-
-        &--metric {
-            margin: 0;
+        &--country {
+            font-size: 2rem;
+            font-weight: 300;
+            margin: 0 0 30px;
+            color: #fff;
         }
 
         &--category {
-            margin: 0 0 10px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
 
-            &__green {
-                color: green;
-            }
-
-            &__yellow {
-                color: yellow;
-            }
-
-            &__orange {
-                color: orange;
-            }
-
-            &__red {
-                color: red;
-            }
+        &--metric {
+            color: #ffffff;
+            font-size: 4rem;
+            font-weight: 100;
+            margin-bottom: 5px;
+            margin-top: 0;
         }
     }
 </style>

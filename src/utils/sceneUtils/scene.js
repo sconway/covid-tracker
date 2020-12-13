@@ -10,10 +10,10 @@ if (!window.WebGLRenderingContext || !Detector.webgl) {
 export const initScene = (scene, renderer, camera) => {
     // Configure and add the scene renderer.
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x0f151d);
+    renderer.setClearColor(0x000000);
     document.getElementById("three-container").appendChild(renderer.domElement);
 
-    camera.position.z = 1000;
+    camera.position.z = 800;
 
     // Add some light to the scene.
     const light = new THREE.HemisphereLight("#aaaaaa", "#ffffff", 2);
@@ -21,7 +21,7 @@ export const initScene = (scene, renderer, camera) => {
 
     const spotLight = new THREE.SpotLight("#ffffff", 4, 1500);
     spotLight.position.set(600, 600, 200);
-    scene.add(spotLight);
+    // scene.add(spotLight);
 
     const light2 = new THREE.AmbientLight("#000000");
     scene.add(light2);
@@ -29,8 +29,8 @@ export const initScene = (scene, renderer, camera) => {
     // Add controls for the scene.
     const OrbitControls = orbitControls.default(THREE);
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.minDistance = 500;
-    controls.maxDistance = 1000;
+    controls.minDistance = 800;
+    controls.maxDistance = 800;
 
     window.addEventListener("resize", onWindowResize, false);
 
