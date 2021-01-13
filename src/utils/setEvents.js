@@ -1,5 +1,6 @@
 import * as THREE from "THREE";
 import { debounce } from "./utils";
+import { listeners } from "../stores/listeners";
 
 export const setEvents = (camera, items, type, wait, onIntersection = null, onNoIntersection = null) => {
     let raycaster = new THREE.Raycaster(),
@@ -41,7 +42,7 @@ export const setEvents = (camera, items, type, wait, onIntersection = null, onNo
                     if (hoveredObject) {
                         // && hoveredMaterial) {
                         // hoveredObject.material = hoveredMaterial;
-
+                        console.log("HOVERED: ", hoveredObject)
                         // growObject(tween, hoveredObject, 1, 500);
                         hoveredObject.scale.set(1, 1, 1);
                     }
@@ -94,8 +95,27 @@ export const setEvents = (camera, items, type, wait, onIntersection = null, onNo
     };
 
     if (!wait) {
+        listeners.update((currentList) => {
+            return [
+                ...currentList, 
+                {
+                    function: listener,
+                    type: type
+                }
+            ]
+        });
         document.addEventListener(type, listener, false);
     } else {
-        document.addEventListener(type, debounce(listener, wait), false);
+        const functionToCall = debounce(listener, wait);
+        listeners.update((currentList) => {
+            return [
+                ...currentList, 
+                {
+                    function: functionToCall,
+                    type: type
+                }
+            ]
+        });
+        document.addEventListener(type, functionToCall, false);
     }
 };

@@ -6,16 +6,21 @@ import { onCountryClick, onCountryHover, removeBodyPointer, toggleGlobeVisibilit
 import { sphere } from "../utils/constants";
 import { isStaticClick, getTween } from "../utils/utils";
 import { country, isCountryClicked, isCountryHovered } from "../stores/country";
+import { overlay } from "../stores/overlay"
 
 let globeMutex = true;
 let lastCountry;
-let overlay;
 let isMouseDown = false;
 let lastPoint;
 let isClicked;
+let overlayMesh;
 
 export const unsubscribeCountryClick = isCountryClicked.subscribe((value) => {
     isClicked = value;
+});
+
+export const unsubscribeOverlay = overlay.subscribe((value) => {
+    overlayMesh = value;
 });
 
 /**
@@ -42,13 +47,14 @@ export const onGlobeMousemove = (event, scene, geo, textureCache, root) => {
             });
 
             // Only add the overlay if it's not there already
-            if (!overlay) {
-                overlay = new THREE.Mesh(sphere, material);
-                overlay.renderOrder = 3;
-                overlay.name = "overlay";
-                root.add(overlay);
+            if (!overlayMesh) {
+                overlayMesh = new THREE.Mesh(sphere, material);
+                overlayMesh.renderOrder = 3;
+                overlayMesh.name = "overlay";
+                overlay.update((o) => overlayMesh)
+                root.add(overlayMesh);
             } else {
-                overlay.material = material;
+                overlayMesh.material = material;
             }
 
             onCountryHover(scene, countriesJSON[country.code.replace(/[ '.]/g, "")]);

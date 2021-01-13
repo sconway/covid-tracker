@@ -19,10 +19,6 @@ export const initScene = (scene, renderer, camera) => {
     const light = new THREE.HemisphereLight("#aaaaaa", "#ffffff", 2);
     scene.add(light);
 
-    const spotLight = new THREE.SpotLight("#ffffff", 4, 1500);
-    spotLight.position.set(600, 600, 200);
-    // scene.add(spotLight);
-
     const light2 = new THREE.AmbientLight("#000000");
     scene.add(light2);
 
@@ -31,12 +27,13 @@ export const initScene = (scene, renderer, camera) => {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.minDistance = 800;
     controls.maxDistance = 800;
-
-    window.addEventListener("resize", onWindowResize, false);
-
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
 };
+
+export const removeFromScene = (scene, name) => {
+    var selectedObject = scene.getObjectByName(name);  
+    scene.remove(selectedObject);
+}
+
+export const emptyScene = (elem) => {
+    while (elem.lastChild) elem.removeChild(elem.lastChild);
+}

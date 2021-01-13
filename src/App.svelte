@@ -2,7 +2,7 @@
     import * as d3 from "d3";
     import * as THREE from "THREE";
     import * as TWEEN from "@tweenjs/tween.js";
-    // import * as countryDetails from "../json/countries.json";
+
     import { onDestroy, onMount } from "svelte";
     import IntroInfo from "./components/IntroInfo.svelte"
     import DataSourceInfo from "./components/DataSourceInfo.svelte"
@@ -11,14 +11,15 @@
     import { fetchCountryData, fetchTotalsData } from "./api/api";
     import { country, countryInfo, isCountryClicked, isCountryHovered } from "./stores/country.js";
     import { isDataPanelActive } from "./stores/dataPanel.js"
-    import { onCountryHoverOff, unsubscribeCountryClick } from "./globeEventHandlers/globeMouseMove";
-    import { initScene } from "./utils/sceneUtils/scene";
+    import { overlay } from "./stores/overlay"
+    import { listeners } from "./stores/listeners.js"
+    import { onCountryHoverOff, unsubscribeCountryClick, unsubscribeOverlay } from "./globeEventHandlers/globeMouseMove";
+    import { initScene, emptyScene } from "./utils/sceneUtils/scene";
     import { loadMap } from "./utils/mapUtils/loadMap";
-    import { setCountryImageBack } from "./utils/utils.js";
+    import { debounce, setCountryImageBack } from "./utils/utils.js";
 
     let camera;
     let cloud;
-    let controls;
     let countries;
     let earth;
     let root;
@@ -49,7 +50,10 @@
     /**
      * Called when the DOM is unmounted. Removes the subscription for handling country clicks.
      */
-    onDestroy(unsubscribeCountryClick);
+    onDestroy(() => {
+        unsubscribeCountryClick();
+        unsubscribeOverlay();
+    });
 
     /**
      * Called when the DOM is first mounted.
@@ -58,15 +62,23 @@
         countries = await fetchCountryData();
         totals = await fetchTotalsData();
 
+        // Remove the loading screen when the app is fully loaded.
         const loadingScreen = document.getElementById("loadingScreen");
         loadingScreen.classList.add("active");
         
+        // Reset things when the window resizes so mouseover behavior is consistent.
+        window.addEventListener("resize", onWindowResize, false);
+        
+        init();
+    });
+
+    const init = () => {
         initThreeJSObjects();
         initScene(scene, renderer, camera);
         loadMap(scene, renderer, camera);
         setEarthAndClouds();
         animate();
-    });
+    }
 
     /**
      * Loop used for rendering and updating values.
@@ -77,6 +89,17 @@
         requestAnimationFrame(animate);
     };
 
+    /**
+     * Called by the animation function about 60 times per second. 
+     * Updates any values that are used for animation or control.
+     */
+     const update = () => {
+      if (!$isCountryHovered && !$isDataPanelActive) {
+        // update any transitions on existing tweens
+        TWEEN.default.update();
+      }
+    };
+    
     const getCountryCovidStats = (countryData, property) => {
         if (countryData && countries && countries.length > 0) {
             const country = countries.find(country => countryData.countryCode === country.code);
@@ -88,17 +111,6 @@
 
     const setEarthAndClouds = () => {
         root = scene.getObjectByName("root");
-    };
-
-    /**
-     * Called by the animation function about 60 times per second. 
-     * Updates any values that are used for animation or control.
-     */
-    const update = () => {
-      if (!$isCountryHovered && !$isDataPanelActive) {
-        // update any transitions on existing tweens
-        TWEEN.default.update();
-      }
     };
 
     /**
@@ -121,6 +133,34 @@
         countryInfo.update((c) => {});
         onCountryHoverOff(scene);
     }
+    
+    const resetScene = () => {
+        const container = document.getElementById("three-container");
+
+        cancelAnimationFrame(animate);
+        emptyScene(container);
+
+        overlay.update((o) => null);
+
+        camera = null;
+        cloud = null;
+        earth = null;
+        root = null;
+        renderer = null;
+        scene = null;
+    }
+
+    const removeListeners = () => {
+        $listeners.forEach((listener) => {
+            document.removeEventListener(listener.type, listener.function)
+        });
+    }
+
+    const onWindowResize = debounce(() => {
+        resetScene();
+        removeListeners();
+        init();
+    }, 500);
 </script>
 
 <svelte:head>

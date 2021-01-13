@@ -63,14 +63,7 @@ export const loadMap = (scene, renderer, camera) => {
     baseMapFront.name = "front-map";
     baseMapBack.name = "back-map";
     root.name = "root";
-
-    // set the earth image to be above the colored globe
-    // earthShader.renderOrder = 3;
-    // earth.renderOrder = 2;
-    // atmosphere.renderOrder = 1;
     
-    // make sure the back is added to the root/scene first
-    // root.add(earthShader);
     root.add(atmosphere);
     root.add(earth);
     root.add(baseMapBack);

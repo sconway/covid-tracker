@@ -73453,15 +73453,21 @@ var app = (function () {
 
     const sphere = new SphereGeometry(400, 200, 200);
 
+    const overlay = writable(null);
+
     let globeMutex = true;
     let lastCountry;
-    let overlay;
     let isMouseDown = false;
     let lastPoint;
     let isClicked;
+    let overlayMesh;
 
     const unsubscribeCountryClick = isCountryClicked.subscribe((value) => {
         isClicked = value;
+    });
+
+    const unsubscribeOverlay = overlay.subscribe((value) => {
+        overlayMesh = value;
     });
 
     /**
@@ -73488,13 +73494,14 @@ var app = (function () {
                 });
 
                 // Only add the overlay if it's not there already
-                if (!overlay) {
-                    overlay = new Mesh(sphere, material);
-                    overlay.renderOrder = 3;
-                    overlay.name = "overlay";
-                    root.add(overlay);
+                if (!overlayMesh) {
+                    overlayMesh = new Mesh(sphere, material);
+                    overlayMesh.renderOrder = 3;
+                    overlayMesh.name = "overlay";
+                    overlay.update((o) => overlayMesh);
+                    root.add(overlayMesh);
                 } else {
-                    overlay.material = material;
+                    overlayMesh.material = material;
                 }
 
                 onCountryHover(scene, countriesJSON[country.code.replace(/[ '.]/g, "")]);
@@ -74790,6 +74797,8 @@ var app = (function () {
         }
     };
 
+    const listeners = writable([]);
+
     var threeOrbitControls = function( THREE ) {
     	/**
     	 * @author qiao / https://github.com/qiao
@@ -75880,10 +75889,6 @@ var app = (function () {
         const light = new HemisphereLight("#aaaaaa", "#ffffff", 2);
         scene.add(light);
 
-        const spotLight = new SpotLight("#ffffff", 4, 1500);
-        spotLight.position.set(600, 600, 200);
-        // scene.add(spotLight);
-
         const light2 = new AmbientLight("#000000");
         scene.add(light2);
 
@@ -75892,14 +75897,10 @@ var app = (function () {
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.minDistance = 800;
         controls.maxDistance = 800;
+    };
 
-        window.addEventListener("resize", onWindowResize, false);
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
+    const emptyScene = (elem) => {
+        while (elem.lastChild) elem.removeChild(elem.lastChild);
     };
 
     function identity$b(x) {
@@ -76160,7 +76161,7 @@ var app = (function () {
                         if (hoveredObject) {
                             // && hoveredMaterial) {
                             // hoveredObject.material = hoveredMaterial;
-
+                            console.log("HOVERED: ", hoveredObject);
                             // growObject(tween, hoveredObject, 1, 500);
                             hoveredObject.scale.set(1, 1, 1);
                         }
@@ -76213,9 +76214,28 @@ var app = (function () {
         };
 
         if (!wait) {
+            listeners.update((currentList) => {
+                return [
+                    ...currentList, 
+                    {
+                        function: listener,
+                        type: type
+                    }
+                ]
+            });
             document.addEventListener(type, listener, false);
         } else {
-            document.addEventListener(type, debounce(listener, wait), false);
+            const functionToCall = debounce(listener, wait);
+            listeners.update((currentList) => {
+                return [
+                    ...currentList, 
+                    {
+                        function: functionToCall,
+                        type: type
+                    }
+                ]
+            });
+            document.addEventListener(type, functionToCall, false);
         }
     };
 
@@ -76318,14 +76338,7 @@ var app = (function () {
         baseMapFront.name = "front-map";
         baseMapBack.name = "back-map";
         root.name = "root";
-
-        // set the earth image to be above the colored globe
-        // earthShader.renderOrder = 3;
-        // earth.renderOrder = 2;
-        // atmosphere.renderOrder = 1;
         
-        // make sure the back is added to the root/scene first
-        // root.add(earthShader);
         root.add(atmosphere);
         root.add(earth);
         root.add(baseMapBack);
@@ -76351,7 +76364,7 @@ var app = (function () {
     const { document: document_1 } = globals;
     const file$4 = "src/App.svelte";
 
-    // (133:4) {#if !$isCountryHovered && !$isCountryClicked && totals}
+    // (173:4) {#if !$isCountryHovered && !$isCountryClicked && totals}
     function create_if_block_3$2(ctx) {
     	let introinfo;
     	let current;
@@ -76392,14 +76405,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3$2.name,
     		type: "if",
-    		source: "(133:4) {#if !$isCountryHovered && !$isCountryClicked && totals}",
+    		source: "(173:4) {#if !$isCountryHovered && !$isCountryClicked && totals}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (137:4) {#if $isDataPanelActive}
+    // (177:4) {#if $isDataPanelActive}
     function create_if_block_2$2(ctx) {
     	let datasourceinfo;
     	let current;
@@ -76431,14 +76444,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$2.name,
     		type: "if",
-    		source: "(137:4) {#if $isDataPanelActive}",
+    		source: "(177:4) {#if $isDataPanelActive}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (141:4) {#if $isCountryClicked}
+    // (181:4) {#if $isCountryClicked}
     function create_if_block_1$2(ctx) {
     	let fullcountrystatistics;
     	let current;
@@ -76482,14 +76495,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$2.name,
     		type: "if",
-    		source: "(141:4) {#if $isCountryClicked}",
+    		source: "(181:4) {#if $isCountryClicked}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (145:4) {#if $isCountryHovered}
+    // (185:4) {#if $isCountryHovered}
     function create_if_block$2(ctx) {
     	let shortcountrystatistics;
     	let current;
@@ -76530,7 +76543,7 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(145:4) {#if $isCountryHovered}",
+    		source: "(185:4) {#if $isCountryHovered}",
     		ctx
     	});
 
@@ -76575,15 +76588,15 @@ var app = (function () {
     			div = element("div");
     			attr_dev(link, "href", "https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;600&display=swap");
     			attr_dev(link, "rel", "stylesheet");
-    			add_location(link, file$4, 126, 4, 4013);
+    			add_location(link, file$4, 166, 4, 5062);
     			attr_dev(p, "class", "info-link svelte-klmexr");
-    			add_location(p, file$4, 130, 4, 4161);
+    			add_location(p, file$4, 170, 4, 5210);
     			attr_dev(div, "class", "container svelte-klmexr");
     			attr_dev(div, "id", "three-container");
     			toggle_class(div, "active", /*$isCountryClicked*/ ctx[4]);
-    			add_location(div, file$4, 148, 4, 4618);
+    			add_location(div, file$4, 188, 4, 5667);
     			attr_dev(main, "class", "svelte-klmexr");
-    			add_location(main, file$4, 129, 0, 4150);
+    			add_location(main, file$4, 169, 0, 5199);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -76747,18 +76760,20 @@ var app = (function () {
     function instance$4($$self, $$props, $$invalidate) {
     	let $isCountryHovered;
     	let $isDataPanelActive;
+    	let $listeners;
     	let $isCountryClicked;
     	validate_store(isCountryHovered, "isCountryHovered");
     	component_subscribe($$self, isCountryHovered, $$value => $$invalidate(2, $isCountryHovered = $$value));
     	validate_store(isDataPanelActive, "isDataPanelActive");
     	component_subscribe($$self, isDataPanelActive, $$value => $$invalidate(3, $isDataPanelActive = $$value));
+    	validate_store(listeners, "listeners");
+    	component_subscribe($$self, listeners, $$value => $$invalidate(13, $listeners = $$value));
     	validate_store(isCountryClicked, "isCountryClicked");
     	component_subscribe($$self, isCountryClicked, $$value => $$invalidate(4, $isCountryClicked = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("App", slots, []);
     	let camera;
     	let cloud;
-    	let controls;
     	let countries;
     	let earth;
     	let root;
@@ -76780,7 +76795,10 @@ var app = (function () {
     	/**
      * Called when the DOM is unmounted. Removes the subscription for handling country clicks.
      */
-    	onDestroy(unsubscribeCountryClick);
+    	onDestroy(() => {
+    		unsubscribeCountryClick();
+    		unsubscribeOverlay();
+    	});
 
     	/**
      * Called when the DOM is first mounted.
@@ -76788,14 +76806,25 @@ var app = (function () {
     	onMount(async () => {
     		$$invalidate(0, countries = await fetchCountryData());
     		$$invalidate(1, totals = await fetchTotalsData());
+
+    		// Remove the loading screen when the app is fully loaded.
     		const loadingScreen = document.getElementById("loadingScreen");
+
     		loadingScreen.classList.add("active");
+
+    		// Reset things when the window resizes so mouseover behavior is consistent.
+    		window.addEventListener("resize", onWindowResize, false);
+
+    		init();
+    	});
+
+    	const init = () => {
     		initThreeJSObjects();
     		initScene(scene, renderer, camera);
     		loadMap(scene, renderer, camera);
     		setEarthAndClouds();
     		animate();
-    	});
+    	};
 
     	/**
      * Loop used for rendering and updating values.
@@ -76804,6 +76833,17 @@ var app = (function () {
     		update();
     		renderer.render(scene, camera);
     		requestAnimationFrame(animate);
+    	};
+
+    	/**
+     * Called by the animation function about 60 times per second. 
+     * Updates any values that are used for animation or control.
+     */
+    	const update = () => {
+    		if (!$isCountryHovered && !$isDataPanelActive) {
+    			// update any transitions on existing tweens
+    			TWEEN.update();
+    		}
     	};
 
     	const getCountryCovidStats = (countryData, property) => {
@@ -76817,17 +76857,6 @@ var app = (function () {
 
     	const setEarthAndClouds = () => {
     		root = scene.getObjectByName("root");
-    	};
-
-    	/**
-     * Called by the animation function about 60 times per second. 
-     * Updates any values that are used for animation or control.
-     */
-    	const update = () => {
-    		if (!$isCountryHovered && !$isDataPanelActive) {
-    			// update any transitions on existing tweens
-    			TWEEN.update();
-    		}
     	};
 
     	/**
@@ -76859,6 +76888,34 @@ var app = (function () {
     		onCountryHoverOff(scene);
     	};
 
+    	const resetScene = () => {
+    		const container = document.getElementById("three-container");
+    		cancelAnimationFrame(animate);
+    		emptyScene(container);
+    		overlay.update(o => null);
+    		camera = null;
+    		cloud = null;
+    		earth = null;
+    		root = null;
+    		renderer = null;
+    		scene = null;
+    	};
+
+    	const removeListeners = () => {
+    		$listeners.forEach(listener => {
+    			document.removeEventListener(listener.type, listener.function);
+    		});
+    	};
+
+    	const onWindowResize = debounce(
+    		() => {
+    			resetScene();
+    			removeListeners();
+    			init();
+    		},
+    		500
+    	);
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -76882,14 +76939,18 @@ var app = (function () {
     		isCountryClicked,
     		isCountryHovered,
     		isDataPanelActive,
+    		overlay,
+    		listeners,
     		onCountryHoverOff,
     		unsubscribeCountryClick,
+    		unsubscribeOverlay,
     		initScene,
+    		emptyScene,
     		loadMap,
+    		debounce,
     		setCountryImageBack,
     		camera,
     		cloud,
-    		controls,
     		countries,
     		earth,
     		root,
@@ -76897,22 +76958,26 @@ var app = (function () {
     		scene,
     		totals,
     		initThreeJSObjects,
+    		init,
     		animate,
+    		update,
     		getCountryCovidStats,
     		setEarthAndClouds,
-    		update,
     		handleBackButtonClick,
     		handleInfoClick,
     		handleClose,
+    		resetScene,
+    		removeListeners,
+    		onWindowResize,
     		$isCountryHovered,
     		$isDataPanelActive,
+    		$listeners,
     		$isCountryClicked
     	});
 
     	$$self.$inject_state = $$props => {
     		if ("camera" in $$props) camera = $$props.camera;
     		if ("cloud" in $$props) cloud = $$props.cloud;
-    		if ("controls" in $$props) controls = $$props.controls;
     		if ("countries" in $$props) $$invalidate(0, countries = $$props.countries);
     		if ("earth" in $$props) earth = $$props.earth;
     		if ("root" in $$props) root = $$props.root;
